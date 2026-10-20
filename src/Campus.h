@@ -27,6 +27,8 @@ public:
     void displayMap() const;
     void displayStatistics() const;
     void displayPaths() const;
+    bool blockPath(int fromId, int toId, const std::string& reason);
+    bool restorePath(int fromId, int toId);
     void findRoute(int sourceId, int destinationId) const;
 };
 

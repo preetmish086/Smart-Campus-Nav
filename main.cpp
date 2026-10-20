@@ -35,6 +35,7 @@ void showMainMenu()
               << "|  [4] Campus Statistics                                   |\n"
               << "|  [5] Find Shortest Route                                 |\n"
               << "|  [6] View Campus Paths                                   |\n"
+              << "|  [7] Admin: Manage Path Closures                         |\n"
               << "|  [0] Exit                                                |\n"
               << "+----------------------------------------------------------+\n";
 }
@@ -90,6 +91,48 @@ int main()
             case 6:
                 campus.displayPaths();
                 break;
+            case 7:
+            {
+                int adminChoice;
+                do
+                {
+                    std::cout << "\n==================== ADMIN CONTROLS =======================\n"
+                              << " [1] Block a path\n"
+                              << " [2] Restore a path\n"
+                              << " [3] View all paths and statuses\n"
+                              << " [0] Return to main menu\n";
+                    adminChoice = readInt("Enter choice: ");
+
+                    if (adminChoice == 1)
+                    {
+                        campus.displayLocations();
+                        int from = readInt("Enter first location ID: ");
+                        int to = readInt("Enter second location ID: ");
+                        std::string reason;
+                        std::cout << "Enter reason for closure: ";
+                        std::getline(std::cin >> std::ws, reason);
+                        if (campus.blockPath(from, to, reason))
+                            std::cout << "Path blocked. New route searches will avoid this connection.\n";
+                        else
+                            std::cout << "Could not block path. Check that the connection exists and is currently open.\n";
+                    }
+                    else if (adminChoice == 2)
+                    {
+                        campus.displayPaths();
+                        int from = readInt("Enter first location ID: ");
+                        int to = readInt("Enter second location ID: ");
+                        if (campus.restorePath(from, to))
+                            std::cout << "Path restored and available for future route searches.\n";
+                        else
+                            std::cout << "Could not restore path. Check that the connection exists and is currently blocked.\n";
+                    }
+                    else if (adminChoice == 3)
+                        campus.displayPaths();
+                    else if (adminChoice != 0)
+                        std::cout << "Invalid admin option.\n";
+                } while (adminChoice != 0);
+                break;
+            }
             case 0:
                 std::cout << "\nExiting Smart Campus Navigation...\nThank you!\n";
                 break;

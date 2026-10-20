@@ -155,11 +155,52 @@ void Campus::displayPaths() const
         const Location* start = findLocation(path.getStartId());
         const Location* end = findLocation(path.getEndId());
         if (start && end)
+        {
             std::cout << " " << start->getName() << " <-> " << end->getName()
                       << " | " << path.getDistance() << " m | "
-                      << (path.isBlocked() ? "BLOCKED" : "OPEN") << "\n";
+                      << (path.isBlocked() ? "BLOCKED" : "OPEN");
+            if (path.isBlocked() && !path.getBlockReason().empty())
+                std::cout << " | Reason: " << path.getBlockReason();
+            std::cout << "\n";
+        }
     }
     std::cout << "============================================================\n";
+}
+
+bool Campus::blockPath(int fromId, int toId, const std::string& reason)
+{
+    for (Path& path : paths)
+    {
+        bool sameConnection =
+            (path.getStartId() == fromId && path.getEndId() == toId) ||
+            (path.getStartId() == toId && path.getEndId() == fromId);
+
+        if (sameConnection)
+        {
+            if (path.isBlocked()) return false;
+            path.setBlocked(true, reason);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Campus::restorePath(int fromId, int toId)
+{
+    for (Path& path : paths)
+    {
+        bool sameConnection =
+            (path.getStartId() == fromId && path.getEndId() == toId) ||
+            (path.getStartId() == toId && path.getEndId() == fromId);
+
+        if (sameConnection)
+        {
+            if (!path.isBlocked()) return false;
+            path.setBlocked(false);
+            return true;
+        }
+    }
+    return false;
 }
 
 void Campus::findRoute(int sourceId, int destinationId) const

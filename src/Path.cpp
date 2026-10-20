@@ -9,7 +9,12 @@ int Path::getStartId() const { return startId; }
 int Path::getEndId() const { return endId; }
 double Path::getDistance() const { return distance; }
 bool Path::isBlocked() const { return blocked; }
-void Path::setBlocked(bool status) { blocked = status; }
+void Path::setBlocked(bool status, const std::string& reason)
+{
+    blocked = status;
+    blockReason = status ? reason : "";
+}
+std::string Path::getBlockReason() const { return blockReason; }
 
 // Since paths are bidirectional, return the opposite endpoint of this path.
 int Path::getOtherEnd(int locationId) const
