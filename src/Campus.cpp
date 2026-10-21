@@ -4,11 +4,14 @@
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <fstream>
+#include <exception>
 
 Campus::Campus()
 {
     loadLocations();
     loadPaths();
+    loadPathStatuses();
 }
 
 void Campus::addPath(int from, int to, double distance)
@@ -56,6 +59,82 @@ void Campus::loadPaths()
     addPath(17, 18, 45); addPath(18, 19, 65); addPath(19, 20, 45);
     addPath(20, 9, 190); addPath(14, 22, 150); addPath(11, 8, 170);
     addPath(17, 10, 130);
+}
+
+void Campus::loadPathStatuses()
+{
+    std::ifstream file("path_status.txt");
+
+    //No saved file yet? Start with every path open.
+    if(!file.is_open())
+        return;
+
+    std::string line;
+
+    while(std::getline(file, line))
+    {
+        std::size_t firstSeparator = line.find('|');
+        if (firstSeparator == std::string::npos)
+            continue;
+
+        std::size_t secondSeparator =
+            line.find('|', firstSeparator + 1);
+
+        if (secondSeparator == std::string::npos)
+            continue;
+
+        try
+        {
+            int fromId = std::stoi(line.substr(0, firstSeparator));
+
+            int toId = std::stoi(
+                line.substr(firstSeparator + 1,
+                            secondSeparator - firstSeparator - 1));
+
+            std::string reason = line.substr(secondSeparator + 1);
+
+            for (Path& path : paths)
+            {
+                bool sameConnection =
+                    (path.getStartId() == fromId &&
+                     path.getEndId() == toId) ||
+                    (path.getStartId() == toId &&
+                     path.getEndId() == fromId);
+
+                if (sameConnection)
+                {
+                    path.setBlocked(true, reason);
+                    break;
+                }
+            }
+        }
+        catch (const std::exception&)
+        {
+            // Ignore malformed records and continue loading.
+        }
+    }
+}
+
+void Campus::savePathStatuses() const
+{
+    std::ofstream file("path_status.txt");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Warning: Could not save path statuses. "
+                  << "Changes may be lost after exit.\n";
+        return;
+    }
+
+    for (const Path& path : paths)
+    {
+        if (path.isBlocked())
+        {
+            file << path.getStartId() << '|'
+                 << path.getEndId() << '|'
+                 << path.getBlockReason() << '\n';
+        }
+    }
 }
 
 const Location* Campus::findLocation(int id) const
@@ -147,23 +226,41 @@ void Campus::displayStatistics() const
               << "============================================================\n";
 }
 
-void Campus::displayPaths() const
+void Campus::displayPaths(bool showBlockedOnly, bool showOpenOnly) const
 {
     std::cout << "\n====================== CAMPUS PATHS ========================\n";
+
+    bool found = false;
+
     for (const Path& path : paths)
     {
+        if (showBlockedOnly && !path.isBlocked())
+            continue;
+
+        if (showOpenOnly && path.isBlocked())
+            continue;
+
         const Location* start = findLocation(path.getStartId());
         const Location* end = findLocation(path.getEndId());
+
         if (start && end)
         {
-            std::cout << " " << start->getName() << " <-> " << end->getName()
+            std::cout << " [" << start->getId() << "] " << start->getName()
+                      << " <-> [" << end->getId() << "] " << end->getName()
                       << " | " << path.getDistance() << " m | "
                       << (path.isBlocked() ? "BLOCKED" : "OPEN");
+
             if (path.isBlocked() && !path.getBlockReason().empty())
                 std::cout << " | Reason: " << path.getBlockReason();
+
             std::cout << "\n";
+            found = true;
         }
     }
+
+    if (!found)
+        std::cout << " No paths match this filter.\n";
+
     std::cout << "============================================================\n";
 }
 
@@ -178,7 +275,9 @@ bool Campus::blockPath(int fromId, int toId, const std::string& reason)
         if (sameConnection)
         {
             if (path.isBlocked()) return false;
+
             path.setBlocked(true, reason);
+            savePathStatuses();
             return true;
         }
     }
@@ -196,7 +295,9 @@ bool Campus::restorePath(int fromId, int toId)
         if (sameConnection)
         {
             if (!path.isBlocked()) return false;
+            
             path.setBlocked(false);
+            savePathStatuses();
             return true;
         }
     }

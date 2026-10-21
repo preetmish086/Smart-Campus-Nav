@@ -105,7 +105,7 @@ int main()
 
                     if (adminChoice == 1)
                     {
-                        campus.displayLocations();
+                        campus.displayPaths(false, true);
                         int from = readInt("Enter first location ID: ");
                         int to = readInt("Enter second location ID: ");
                         std::string reason;
@@ -118,7 +118,7 @@ int main()
                     }
                     else if (adminChoice == 2)
                     {
-                        campus.displayPaths();
+                        campus.displayPaths(true, false);
                         int from = readInt("Enter first location ID: ");
                         int to = readInt("Enter second location ID: ");
                         if (campus.restorePath(from, to))

@@ -15,6 +15,9 @@ private:
     void addPath(int from, int to, double distance);
     void loadLocations();
     void loadPaths();
+    void loadPathStatuses();
+    void savePathStatuses() const;
+
     const Location* findLocation(int id) const;
     static std::string toLower(std::string text);
 
@@ -26,7 +29,8 @@ public:
     void searchById(int id) const;
     void displayMap() const;
     void displayStatistics() const;
-    void displayPaths() const;
+    void displayPaths(bool showBlockedOnly = false,
+                    bool showOpenOnly = false) const;
     bool blockPath(int fromId, int toId, const std::string& reason);
     bool restorePath(int fromId, int toId);
     void findRoute(int sourceId, int destinationId) const;
