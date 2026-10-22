@@ -1,20 +1,44 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <cctype>
+#include <exception>
 #include "src/Campus.h"
+
 
 int readInt(const std::string& prompt)
 {
-    int value;
+    std::string line;
+
     while (true)
     {
         std::cout << prompt;
-        if (std::cin >> value) return value;
+
+        if (!std::getline(std::cin >> std::ws, line))
+            return 0;
+
+        try
+        {
+            std::size_t position;
+            int value = std::stoi(line, &position);
+
+            // Allow trailing spaces, but reject extra characters.
+            while (position < line.size() &&
+                   std::isspace(static_cast<unsigned char>(line[position])))
+                ++position;
+
+            if (position == line.size())
+                return value;
+        }
+        catch (const std::exception&)
+        {
+            // Invalid input: display the message below.
+        }
+
         std::cout << "Please enter a valid whole number.\n";
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 }
+
 
 void showHeader()
 {
@@ -108,9 +132,19 @@ int main()
                         campus.displayPaths(false, true);
                         int from = readInt("Enter first location ID: ");
                         int to = readInt("Enter second location ID: ");
+                        
                         std::string reason;
-                        std::cout << "Enter reason for closure: ";
-                        std::getline(std::cin >> std::ws, reason);
+
+                        do
+                        {
+                            std::cout << "Enter reason for closure: ";
+                            std::getline(std::cin >> std::ws, reason);
+
+                            if (reason.find_first_not_of(" \t\r\n") == std::string::npos)
+                                std::cout << "Closure reason cannot be empty. Please try again.\n";
+
+                        } while (reason.find_first_not_of(" \t\r\n") == std::string::npos);
+
                         if (campus.blockPath(from, to, reason))
                             std::cout << "Path blocked. New route searches will avoid this connection.\n";
                         else
