@@ -2,3 +2,6 @@
 *.exe
 *.out
 build/
+
+# Runtime path closure state
+path_status.txt

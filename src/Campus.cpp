@@ -115,15 +115,15 @@ void Campus::loadPathStatuses()
     }
 }
 
-void Campus::savePathStatuses() const
+
+bool Campus::savePathStatuses() const
 {
     std::ofstream file("path_status.txt");
 
     if (!file.is_open())
     {
-        std::cerr << "Warning: Could not save path statuses. "
-                  << "Changes may be lost after exit.\n";
-        return;
+        std::cerr << "Error: Could not save path statuses.\n";
+        return false;
     }
 
     for (const Path& path : paths)
@@ -135,7 +135,18 @@ void Campus::savePathStatuses() const
                  << path.getBlockReason() << '\n';
         }
     }
+
+    file.flush();
+
+    if (!file.good())
+    {
+        std::cerr << "Error: Failed while writing path statuses.\n";
+        return false;
+    }
+
+    return true;
 }
+
 
 const Location* Campus::findLocation(int id) const
 {
@@ -277,7 +288,13 @@ bool Campus::blockPath(int fromId, int toId, const std::string& reason)
             if (path.isBlocked()) return false;
 
             path.setBlocked(true, reason);
-            savePathStatuses();
+
+            if (!savePathStatuses())
+            {
+                path.setBlocked(false);
+                return false;
+            }
+
             return true;
         }
     }
@@ -296,8 +313,15 @@ bool Campus::restorePath(int fromId, int toId)
         {
             if (!path.isBlocked()) return false;
             
+            std::string previousReason = path.getBlockReason();
             path.setBlocked(false);
-            savePathStatuses();
+
+            if (!savePathStatuses())
+            {
+                path.setBlocked(true, previousReason);
+                return false;
+            }
+
             return true;
         }
     }

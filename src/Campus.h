@@ -16,7 +16,7 @@ private:
     void loadLocations();
     void loadPaths();
     void loadPathStatuses();
-    void savePathStatuses() const;
+    bool savePathStatuses() const;
 
     const Location* findLocation(int id) const;
     static std::string toLower(std::string text);
