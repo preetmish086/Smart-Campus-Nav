@@ -8,6 +8,10 @@ Path::Path(int startId, int endId, double distance, bool blocked)
 int Path::getStartId() const { return startId; }
 int Path::getEndId() const { return endId; }
 double Path::getDistance() const { return distance; }
+void Path::setDistance(double newDistance)
+{
+    distance = newDistance;
+}
 bool Path::isBlocked() const { return blocked; }
 void Path::setBlocked(bool status, const std::string& reason)
 {

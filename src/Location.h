@@ -1,7 +1,9 @@
+
 #ifndef LOCATION_H
 #define LOCATION_H
 
 #include <string>
+#include <iostream>
 
 class Location
 {
@@ -19,6 +21,9 @@ public:
     std::string getCategory() const;
     std::string getDescription() const;
     void displayDetails() const;
+
+    // Overload the output operator for Location objects.
+    friend std::ostream& operator<<(std::ostream& out, const Location& location);
 };
 
 #endif
