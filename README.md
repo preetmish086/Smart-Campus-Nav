@@ -12,23 +12,11 @@ A graph-based campus navigation application developed in **C++17** using Object-
 
 </div>
 
-<div align="center">
-
-# Smart Campus Navigation and Route Optimization System
-
-![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
-![OOP](https://img.shields.io/badge/Paradigm-OOP-orange.svg)
-![Institution](https://img.shields.io/badge/IIIT-Bhubaneswar-purple.svg)
-
-A graph-based campus navigation application developed in **C++17** using Object-Oriented Programming concepts.
-
-</div>
-
 ---
 
 The application models a logical representation of the IIIT Bhubaneswar campus, calculates routes between locations using Dijkstra's algorithm, and allows administrators to manage pathways and temporary closures.
 
-## Project Overview
+## 1️⃣Project Overview
 
 The campus is represented as an **undirected weighted graph**:
 
@@ -41,7 +29,7 @@ The supplied dataset contains **22 campus locations and 31 initial pathways**.
 
 ---
 
-## Features
+## 2️⃣Features
 
 ### User Operations
 - View the logical campus map.
@@ -75,7 +63,7 @@ Path management operations validate inputs and update the corresponding data fil
 
 ---
 
-## Object-Oriented Design
+## 3️⃣Object-Oriented Design
 
 The project is organized around three main classes:
 
@@ -96,7 +84,7 @@ OOP concepts demonstrated:
 
 ---
 
-## Graph Algorithm
+## 4️⃣Graph Algorithm
 
 Dijkstra's algorithm is used to calculate the minimum-cost route.
 
@@ -119,7 +107,7 @@ The current implementation stores connections in a `std::vector<Path>` and scans
 
 ---
 
-## File Persistence
+## 5️⃣File Persistence
 
 The application uses two local text files:
 
@@ -134,7 +122,7 @@ Administrative changes are saved locally, allowing pathway updates and blockage 
 
 ---
 
-## Project Structure
+## 6️⃣Project Structure
 
 ```text
 SmartCampusNav/
@@ -155,7 +143,7 @@ SmartCampusNav/
 
 ---
 
-## Compilation and Execution
+## 7️⃣Compilation and Execution
 
 ### Requirements
 - C++ compiler supporting C++17.
@@ -184,7 +172,7 @@ g++ -std=c++17 -Wall -Wextra -pedantic main.cpp src/Location.cpp src/Path.cpp sr
 
 ---
 
-## Demonstration Scenario
+## 8️⃣Demonstration Scenario
 
 A sample route is calculated from **Hostel E (ID 12)** to **Open Recreation Ground (ID 22)**.
 
@@ -200,7 +188,7 @@ This demonstrates how pathway availability affects route calculation and allows 
 
 ---
 
-## Limitations
+## 9️⃣Limitations
 
 - The application uses a terminal-based interface.
 - The campus map is a logical schematic, not a geographically scaled map.
@@ -211,7 +199,7 @@ This demonstrates how pathway availability affects route calculation and allows 
 
 ---
 
-## Future Enhancements
+## 1️⃣0️⃣Future Enhancements
 
 Possible extensions include:
 - A graphical campus map.
@@ -223,7 +211,7 @@ Possible extensions include:
 
 ---
 
-## Academic Context
+## 1️⃣1️⃣Academic Context
 
 - **Project:** Smart Campus Navigation and Route Optimization System  
 - **Course:** Object-Oriented Programming (OOPS)  
