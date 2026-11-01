@@ -31,7 +31,7 @@ The supplied dataset contains **22 campus locations and 31 initial pathways**.
 
 ## 2️⃣Features
 
-### User Operations
+### 🔷User Operations
 - View the logical campus map.
 - Explore the campus location directory.
 - Search for locations by ID or name.
@@ -39,7 +39,7 @@ The supplied dataset contains **22 campus locations and 31 initial pathways**.
 - Display available pathways and their statuses.
 - Find routes between two campus locations.
 
-### Route Optimization
+### 🔷Route Optimization
 The system uses **Dijkstra's shortest-path algorithm** and provides two route-selection modes:
 
 1. **Shortest Distance:** Minimizes the total physical distance in metres.
@@ -49,7 +49,7 @@ The system uses **Dijkstra's shortest-path algorithm** and provides two route-se
 
 Blocked pathways are excluded from route calculation. If a pathway becomes unavailable, the algorithm can find an alternative route when one exists.
 
-### Administrative Operations
+### 🔷Administrative Operations
 The administrator interface provides:
 
 - Add a new pathway.
@@ -132,6 +132,12 @@ SmartCampusNav/
 ├── path_status.txt
 ├── README.md
 │
+├── assets/
+│   └── logo.png
+│
+├── docs/
+│   └── project_report.pdf
+│
 └── src/
     ├── Campus.h
     ├── Campus.cpp
@@ -145,18 +151,18 @@ SmartCampusNav/
 
 ## 7️⃣Compilation and Execution
 
-### Requirements
+### 🔷Requirements
 - C++ compiler supporting C++17.
 - GCC / MinGW recommended.
 
-### Compile
+### 🔷Compile
 Run the following command from the project root:
 
 ```bash
 g++ -std=c++17 -Wall -Wextra -pedantic main.cpp src/Location.cpp src/Path.cpp src/Campus.cpp -o SmartCampusNav
 ```
 
-### Run
+### 🔷Run
 
 **On Windows:**
 ```powershell
