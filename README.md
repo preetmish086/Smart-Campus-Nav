@@ -1,5 +1,19 @@
 <div align="center">
 
+<img src="logo.png" alt="IIIT Bhubaneswar Logo" width="80" style="border-radius: 50%;" />
+
+# Smart Campus Navigation and Route Optimization System
+
+![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
+![OOP](https://img.shields.io/badge/Paradigm-OOP-orange.svg)
+![Institution](https://img.shields.io/badge/IIIT-Bhubaneswar-purple.svg)
+
+A graph-based campus navigation application developed in **C++17** using Object-Oriented Programming concepts.
+
+</div>
+
+<div align="center">
+
 # Smart Campus Navigation and Route Optimization System
 
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
@@ -14,7 +28,7 @@ A graph-based campus navigation application developed in **C++17** using Object-
 
 The application models a logical representation of the IIIT Bhubaneswar campus, calculates routes between locations using Dijkstra's algorithm, and allows administrators to manage pathways and temporary closures.
 
-## 🗺️ Project Overview
+## Project Overview
 
 The campus is represented as an **undirected weighted graph**:
 
@@ -27,9 +41,9 @@ The supplied dataset contains **22 campus locations and 31 initial pathways**.
 
 ---
 
-## ⚡ Features
+## Features
 
-### 👤 User Operations
+### User Operations
 - View the logical campus map.
 - Explore the campus location directory.
 - Search for locations by ID or name.
@@ -37,7 +51,7 @@ The supplied dataset contains **22 campus locations and 31 initial pathways**.
 - Display available pathways and their statuses.
 - Find routes between two campus locations.
 
-### 🧭 Route Optimization
+### Route Optimization
 The system uses **Dijkstra's shortest-path algorithm** and provides two route-selection modes:
 
 1. **Shortest Distance:** Minimizes the total physical distance in metres.
@@ -47,7 +61,7 @@ The system uses **Dijkstra's shortest-path algorithm** and provides two route-se
 
 Blocked pathways are excluded from route calculation. If a pathway becomes unavailable, the algorithm can find an alternative route when one exists.
 
-### 🛠️ Administrative Operations
+### Administrative Operations
 The administrator interface provides:
 
 - Add a new pathway.
@@ -61,7 +75,7 @@ Path management operations validate inputs and update the corresponding data fil
 
 ---
 
-## 🏗️ Object-Oriented Design
+## Object-Oriented Design
 
 The project is organized around three main classes:
 
@@ -82,7 +96,7 @@ OOP concepts demonstrated:
 
 ---
 
-## 📐 Graph Algorithm
+## Graph Algorithm
 
 Dijkstra's algorithm is used to calculate the minimum-cost route.
 
@@ -105,7 +119,7 @@ The current implementation stores connections in a `std::vector<Path>` and scans
 
 ---
 
-## 💾 File Persistence
+## File Persistence
 
 The application uses two local text files:
 
@@ -120,7 +134,7 @@ Administrative changes are saved locally, allowing pathway updates and blockage 
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 SmartCampusNav/
@@ -141,7 +155,7 @@ SmartCampusNav/
 
 ---
 
-## 🚀 Compilation and Execution
+## Compilation and Execution
 
 ### Requirements
 - C++ compiler supporting C++17.
@@ -170,7 +184,7 @@ g++ -std=c++17 -Wall -Wextra -pedantic main.cpp src/Location.cpp src/Path.cpp sr
 
 ---
 
-## 🔬 Demonstration Scenario
+## Demonstration Scenario
 
 A sample route is calculated from **Hostel E (ID 12)** to **Open Recreation Ground (ID 22)**.
 
@@ -186,7 +200,7 @@ This demonstrates how pathway availability affects route calculation and allows 
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
 - The application uses a terminal-based interface.
 - The campus map is a logical schematic, not a geographically scaled map.
@@ -197,7 +211,7 @@ This demonstrates how pathway availability affects route calculation and allows 
 
 ---
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 Possible extensions include:
 - A graphical campus map.
@@ -209,7 +223,7 @@ Possible extensions include:
 
 ---
 
-## 🎓 Academic Context
+## Academic Context
 
 - **Project:** Smart Campus Navigation and Route Optimization System  
 - **Course:** Object-Oriented Programming (OOPS)  
