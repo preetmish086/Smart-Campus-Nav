@@ -1,3 +1,4 @@
+
 #ifndef PATH_H
 #define PATH_H
 
@@ -18,6 +19,8 @@ public:
     int getStartId() const;
     int getEndId() const;
     double getDistance() const;
+    void setDistance(double newDistance);
+
     bool isBlocked() const;
     void setBlocked(bool status, const std::string& reason = "");
     std::string getBlockReason() const;

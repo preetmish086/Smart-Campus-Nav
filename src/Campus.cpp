@@ -6,6 +6,8 @@
 #include <vector>
 #include <fstream>
 #include <exception>
+#include <cmath>
+#include <string>
 
 Campus::Campus()
 {
@@ -14,10 +16,6 @@ Campus::Campus()
     loadPathStatuses();
 }
 
-void Campus::addPath(int from, int to, double distance)
-{
-    paths.push_back(Path(from, to, distance));
-}
 
 void Campus::loadLocations()
 {
@@ -45,20 +43,288 @@ void Campus::loadLocations()
     locations.push_back(Location(22, "Open Recreation Ground", "Recreation", "Open campus space used for recreation and outdoor activities."));
 }
 
+
 void Campus::loadPaths()
 {
-    // Illustrative distances in metres; every path is bidirectional.
-    addPath(1, 21, 80);  addPath(1, 5, 140);  addPath(1, 2, 220);
-    addPath(21, 5, 100); addPath(5, 2, 120); addPath(2, 3, 90);
-    addPath(2, 4, 110);  addPath(3, 4, 75);  addPath(3, 6, 160);
-    addPath(4, 8, 180);  addPath(5, 7, 130); addPath(7, 10, 100);
-    addPath(6, 8, 95);   addPath(6, 9, 170); addPath(8, 10, 85);
-    addPath(8, 22, 120); addPath(9, 22, 90); addPath(10, 11, 140);
-    addPath(11, 12, 45); addPath(12, 13, 50); addPath(13, 14, 45);
-    addPath(14, 15, 70); addPath(15, 16, 50); addPath(16, 17, 160);
-    addPath(17, 18, 45); addPath(18, 19, 65); addPath(19, 20, 45);
-    addPath(20, 9, 190); addPath(14, 22, 150); addPath(11, 8, 170);
-    addPath(17, 10, 130);
+    std::ifstream file("paths.txt");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open paths.txt\n";
+        return;
+    }
+
+    // Build a temporary graph so invalid data is not
+    // partially loaded into the actual campus graph.
+    std::vector<Path> loadedPaths;
+    std::string line;
+    int lineNumber = 0;
+
+    auto hasOnlyTrailingWhitespace =
+        [](const std::string& text, std::size_t position)
+    {
+        while (position < text.size())
+        {
+            if (!std::isspace(
+                    static_cast<unsigned char>(text[position])))
+                return false;
+
+            ++position;
+        }
+
+        return true;
+    };
+
+    while (std::getline(file, line))
+    {
+        ++lineNumber;
+
+        // Ignore empty lines.
+        if (line.find_first_not_of(" \t\r\n") ==
+            std::string::npos)
+            continue;
+
+        // Each record must contain exactly two separators.
+        std::size_t first = line.find('|');
+        std::size_t second =
+            (first == std::string::npos)
+                ? std::string::npos
+                : line.find('|', first + 1);
+
+        if (first == std::string::npos ||
+            second == std::string::npos ||
+            line.find('|', second + 1) != std::string::npos)
+        {
+            std::cerr << "Invalid path record on line "
+                      << lineNumber << ".\n";
+            return;
+        }
+
+        std::string fromText = line.substr(0, first);
+        std::string toText =
+            line.substr(first + 1, second - first - 1);
+        std::string distanceText = line.substr(second + 1);
+
+        int fromId;
+        int toId;
+        double distance;
+
+        try
+        {
+            std::size_t pos1, pos2, pos3;
+
+            fromId = std::stoi(fromText, &pos1);
+            toId = std::stoi(toText, &pos2);
+            distance = std::stod(distanceText, &pos3);
+
+            if (!hasOnlyTrailingWhitespace(fromText, pos1) ||
+                !hasOnlyTrailingWhitespace(toText, pos2) ||
+                !hasOnlyTrailingWhitespace(distanceText, pos3))
+            {
+                std::cerr << "Invalid value on line "
+                          << lineNumber << ".\n";
+                return;
+            }
+        }
+        catch (const std::exception&)
+        {
+            std::cerr << "Invalid number on line "
+                      << lineNumber << ".\n";
+            return;
+        }
+
+        // Validate the connection before adding it.
+        if (fromId == toId ||
+            findLocation(fromId) == nullptr ||
+            findLocation(toId) == nullptr ||
+            !std::isfinite(distance) ||
+            distance <= 0)
+        {
+            std::cerr << "Invalid location ID or distance on line "
+                      << lineNumber << ".\n";
+            return;
+        }
+
+        // A bidirectional connection must appear only once.
+        for (const Path& existing : loadedPaths)
+        {
+            bool duplicate =
+                (existing.getStartId() == fromId &&
+                 existing.getEndId() == toId) ||
+                (existing.getStartId() == toId &&
+                 existing.getEndId() == fromId);
+
+            if (duplicate)
+            {
+                std::cerr << "Duplicate path on line "
+                          << lineNumber << ".\n";
+                return;
+            }
+        }
+
+        loadedPaths.emplace_back(fromId, toId, distance);
+    }
+
+    if (file.bad())
+    {
+        std::cerr << "Error while reading paths.txt\n";
+        return;
+    }
+
+    // Accept the new graph only after the entire file is valid.
+    paths.swap(loadedPaths);
+
+    std::cout << "Loaded " << paths.size()
+              << " paths from paths.txt\n";
+}
+
+bool Campus::savePaths() const
+{
+    std::ofstream file("paths.txt");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not save paths.txt\n";
+        return false;
+    }
+
+    for (const Path& path : paths)
+    {
+        file << path.getStartId() << '|'
+             << path.getEndId() << '|'
+             << path.getDistance() << '\n';
+    }
+
+    file.flush();
+
+    if (!file.good())
+    {
+        std::cerr << "Error: Failed while writing paths.txt\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool Campus::addPath(int fromId, int toId, double distance)
+{
+    // Validate the two endpoints and distance.
+    if (fromId == toId ||
+        findLocation(fromId) == nullptr ||
+        findLocation(toId) == nullptr ||
+        !std::isfinite(distance) ||
+        distance <= 0)
+    {
+        std::cout << "Invalid location IDs or distance.\n";
+        return false;
+    }
+
+    // Connections are bidirectional, so check both orientations.
+    for (const Path& path : paths)
+    {
+        bool sameConnection =
+            (path.getStartId() == fromId &&
+             path.getEndId() == toId) ||
+            (path.getStartId() == toId &&
+             path.getEndId() == fromId);
+
+        if (sameConnection)
+        {
+            std::cout << "That connection already exists.\n";
+            return false;
+        }
+    }
+
+    paths.emplace_back(fromId, toId, distance);
+
+    if (!savePaths())
+    {
+        paths.pop_back();
+        std::cout << "Could not save the new path. Change cancelled.\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool Campus::editPathDistance(
+    int fromId, int toId, double newDistance)
+{
+    if (!std::isfinite(newDistance) || newDistance <= 0)
+    {
+        std::cout << "Distance must be a positive, finite number.\n";
+        return false;
+    }
+
+    for (Path& path : paths)
+    {
+        bool sameConnection =
+            (path.getStartId() == fromId &&
+             path.getEndId() == toId) ||
+            (path.getStartId() == toId &&
+             path.getEndId() == fromId);
+
+        if (sameConnection)
+        {
+            double oldDistance = path.getDistance();
+            path.setDistance(newDistance);
+
+            if (!savePaths())
+            {
+                path.setDistance(oldDistance);
+                std::cout << "Could not save the change. Distance restored.\n";
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    std::cout << "That connection does not exist.\n";
+    return false;
+}
+
+bool Campus::removePath(int fromId, int toId)
+{
+    for (std::size_t i = 0; i < paths.size(); ++i)
+    {
+        bool sameConnection =
+            (paths[i].getStartId() == fromId &&
+             paths[i].getEndId() == toId) ||
+            (paths[i].getStartId() == toId &&
+             paths[i].getEndId() == fromId);
+
+        if (sameConnection)
+        {
+            // Keep a copy in case a save fails and we need to roll back.
+            Path removedPath = paths[i];
+            paths.erase(paths.begin() + i);
+
+            if (!savePaths())
+            {
+                paths.insert(paths.begin() + i, removedPath);
+                std::cout << "Could not save the change. Path restored.\n";
+                return false;
+            }
+
+            // Also remove any saved closure for this connection.
+            if (!savePathStatuses())
+            {
+                paths.insert(paths.begin() + i, removedPath);
+                savePaths();
+                savePathStatuses();
+
+                std::cout << "Could not update closure records. "
+                          << "Path removal cancelled.\n";
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    std::cout << "That connection does not exist.\n";
+    return false;
 }
 
 void Campus::loadPathStatuses()
@@ -301,6 +567,17 @@ bool Campus::blockPath(int fromId, int toId, const std::string& reason)
     return false;
 }
 
+bool Campus::hasBlockedPaths() const
+{
+    for (const Path& path : paths)
+    {
+        if (path.isBlocked())
+            return true;
+    }
+
+    return false;
+}
+
 bool Campus::restorePath(int fromId, int toId)
 {
     for (Path& path : paths)
@@ -328,8 +605,7 @@ bool Campus::restorePath(int fromId, int toId)
     return false;
 }
 
-void Campus::findRoute(int sourceId, int destinationId) const
-{
+void Campus::findRoute(int sourceId, int destinationId, bool fastest) const{
     if (!findLocation(sourceId) || !findLocation(destinationId))
     {
         std::cout << "\nInvalid source or destination ID. Please choose IDs from the directory.\n";
@@ -373,7 +649,20 @@ void Campus::findRoute(int sourceId, int destinationId) const
             int neighbour = path.getOtherEnd(current);
             if (neighbour == -1 || visited[neighbour]) continue;
 
-            double newDistance = distance[current] + path.getDistance();
+            // Shortest mode minimizes distance.
+            // Fastest mode estimates travel time using assumed walking speeds.
+            double assumedSpeed = 1.2;
+
+            if (fastest && path.getDistance() >= 150.0)
+            {
+                assumedSpeed = 1.5;
+            }
+
+            double edgeCost = fastest
+                ? path.getDistance() / assumedSpeed
+                : path.getDistance();
+
+            double newDistance = distance[current] + edgeCost;
             if (newDistance < distance[neighbour])
             {
                 distance[neighbour] = newDistance;
@@ -402,6 +691,40 @@ void Campus::findRoute(int sourceId, int destinationId) const
         if (i > 0) std::cout << " -> ";
         std::cout << findLocation(route[i])->getName();
     }
-    std::cout << "\n Total distance: " << distance[destinationId] << " metres\n"
-              << "============================================================\n";
+    // Calculate the actual physical distance and estimated walking time
+    // along the selected route.
+    double totalDistance = 0.0;
+    double estimatedSeconds = 0.0;
+
+    for (std::size_t i = 0; i + 1 < route.size(); ++i)
+    {
+        int from = route[i];
+        int to = route[i + 1];
+
+        for (const Path& path : paths)
+        {
+            bool sameConnection =
+                (path.getStartId() == from && path.getEndId() == to) ||
+                (path.getStartId() == to && path.getEndId() == from);
+
+            if (sameConnection)
+            {
+                double speed =
+                    (path.getDistance() >= 150.0) ? 1.5 : 1.2;
+
+                totalDistance += path.getDistance();
+                estimatedSeconds += path.getDistance() / speed;
+                break;
+            }
+        }
+    }
+
+    double estimatedMinutes = estimatedSeconds / 60.0;
+
+    std::cout << "\n Route mode: "
+          << (fastest ? "Fastest estimated time" : "Shortest distance")
+          << "\n Total distance: " << totalDistance << " metres\n"
+          << " Estimated walking time: " << estimatedMinutes << " minutes\n"
+          << " (Approximate, based on assumed walking speeds)\n"
+          << "============================================================\n";
 }

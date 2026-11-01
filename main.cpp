@@ -57,7 +57,7 @@ void showMainMenu()
               << "|  [2] Explore Campus Directory                            |\n"
               << "|  [3] Search Location                                     |\n"
               << "|  [4] Campus Statistics                                   |\n"
-              << "|  [5] Find Shortest Route                                 |\n"
+              << "|  [5] Find Route (Shortest/Fastest)                                |\n"
               << "|  [6] View Campus Paths                                   |\n"
               << "|  [7] Admin: Manage Path Closures                         |\n"
               << "|  [0] Exit                                                |\n"
@@ -107,9 +107,23 @@ int main()
             case 5:
             {
                 campus.displayLocations();
+
                 int source = readInt("Enter SOURCE location ID: ");
                 int destination = readInt("Enter DESTINATION location ID: ");
-                campus.findRoute(source, destination);
+
+                std::cout << "\nChoose route mode:\n";
+                std::cout << "1. Shortest Distance\n";
+                std::cout << "2. Fastest Estimated Time\n";
+
+                int choice = readInt("Enter choice: ");
+
+                if (choice != 1 && choice != 2)
+                {
+                    std::cout << "Invalid route mode. Please choose 1 or 2.\n";
+                    break;
+                }
+
+                campus.findRoute(source, destination, choice == 2);
                 break;
             }
             case 6:
@@ -117,22 +131,110 @@ int main()
                 break;
             case 7:
             {
+                std::string username, password;
+
+                std::cout << "\n==================== ADMIN LOGIN ==========================\n";
+                std::cout << "Username: ";
+                std::getline(std::cin >> std::ws, username);
+
+                std::cout << "Password: ";
+                std::getline(std::cin >> std::ws, password);
+
+                if (username != "admin" || password != "campus123")
+                {
+                    std::cout << "\nAccess denied. Incorrect admin credentials.\n";
+                    break;
+                }
+
+                std::cout << "\nLogin successful. Welcome, Administrator.\n";
+
                 int adminChoice;
+
                 do
                 {
                     std::cout << "\n==================== ADMIN CONTROLS =======================\n"
-                              << " [1] Block a path\n"
-                              << " [2] Restore a path\n"
-                              << " [3] View all paths and statuses\n"
+                              << " [1] Add a new path\n"
+                              << " [2] Edit path distance\n"
+                              << " [3] Remove a path\n"
+                              << " [4] Block a path\n"
+                              << " [5] Restore a path\n"
+                              << " [6] View all paths and statuses\n"
                               << " [0] Return to main menu\n";
+
                     adminChoice = readInt("Enter choice: ");
 
                     if (adminChoice == 1)
                     {
-                        campus.displayPaths(false, true);
+                        campus.displayLocations();
+
                         int from = readInt("Enter first location ID: ");
                         int to = readInt("Enter second location ID: ");
-                        
+                        double distance;
+
+                        std::cout << "Enter distance in metres: ";
+
+                        if (!(std::cin >> distance))
+                        {
+                            std::cin.clear();
+                            std::cin.ignore(
+                                std::numeric_limits<std::streamsize>::max(), '\n');
+                            std::cout << "Invalid distance input.\n";
+                            continue;
+                        }
+
+                        if (campus.addPath(from, to, distance))
+                            std::cout << "Path added and saved successfully.\n";
+                    }
+                    else if (adminChoice == 2)
+                    {
+                        campus.displayPaths();
+
+                        int from = readInt("Enter first location ID: ");
+                        int to = readInt("Enter second location ID: ");
+                        double distance;
+
+                        std::cout << "Enter the new distance in metres: ";
+
+                        if (!(std::cin >> distance))
+                        {
+                            std::cin.clear();
+                            std::cin.ignore(
+                                std::numeric_limits<std::streamsize>::max(), '\n');
+                            std::cout << "Invalid distance input.\n";
+                            continue;
+                        }
+
+                        if (campus.editPathDistance(from, to, distance))
+                            std::cout << "Path distance updated successfully.\n";
+                    }
+                    else if (adminChoice == 3)
+                    {
+                        campus.displayPaths();
+
+                        int from = readInt("Enter first location ID: ");
+                        int to = readInt("Enter second location ID: ");
+
+                        std::cout << "Remove the connection between these locations? (y/n): ";
+                        char confirmation;
+                        std::cin >> confirmation;
+
+                        if (confirmation == 'y' || confirmation == 'Y')
+                        {
+                            if (campus.removePath(from, to))
+                                std::cout << "Path removed successfully.\n";
+                        }
+                        else
+                        {
+                            std::cout << "Path removal cancelled.\n";
+                        }
+                    }
+                    else if (adminChoice == 4)
+                    {
+                        campus.displayPaths(false, true);
+
+                        int from = readInt("Enter first location ID: ");
+                        int to = readInt("Enter second location ID: ");
+
                         std::string reason;
 
                         do
@@ -140,31 +242,49 @@ int main()
                             std::cout << "Enter reason for closure: ";
                             std::getline(std::cin >> std::ws, reason);
 
-                            if (reason.find_first_not_of(" \t\r\n") == std::string::npos)
-                                std::cout << "Closure reason cannot be empty. Please try again.\n";
-
-                        } while (reason.find_first_not_of(" \t\r\n") == std::string::npos);
+                            if (reason.find_first_not_of(" \t\r\n") ==
+                                std::string::npos)
+                            {
+                                std::cout << "Closure reason cannot be empty. "
+                                          << "Please try again.\n";
+                            }
+                        }
+                        while (reason.find_first_not_of(" \t\r\n") ==
+                               std::string::npos);
 
                         if (campus.blockPath(from, to, reason))
                             std::cout << "Path blocked. New route searches will avoid this connection.\n";
                         else
-                            std::cout << "Could not block path. Check that the connection exists and is currently open.\n";
+                            std::cout << "Could not block path. Check that the connection exists and is open.\n";
                     }
-                    else if (adminChoice == 2)
+                    else if (adminChoice == 5)
                     {
+                        if (!campus.hasBlockedPaths())
+                        {
+                            std::cout << "\nThere are currently no blocked paths to restore.\n";
+                            break;
+                        }
                         campus.displayPaths(true, false);
+
                         int from = readInt("Enter first location ID: ");
                         int to = readInt("Enter second location ID: ");
+
                         if (campus.restorePath(from, to))
-                            std::cout << "Path restored and available for future route searches.\n";
+                            std::cout << "Path restored successfully.\n";
                         else
-                            std::cout << "Could not restore path. Check that the connection exists and is currently blocked.\n";
+                            std::cout << "Could not restore path. Check that the connection exists and is blocked.\n";
                     }
-                    else if (adminChoice == 3)
+                    else if (adminChoice == 6)
+                    {
                         campus.displayPaths();
+                    }
                     else if (adminChoice != 0)
+                    {
                         std::cout << "Invalid admin option.\n";
+                    }
+
                 } while (adminChoice != 0);
+
                 break;
             }
             case 0:
