@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="logo.png" alt="IIIT Bhubaneswar Logo" width="80" style="border-radius: 50%;" />
+<img src="assets/logo.png" alt="IIIT Bhubaneswar Logo" width="80" style="border-radius: 50%;" />
 
 # Smart Campus Navigation and Route Optimization System
 
