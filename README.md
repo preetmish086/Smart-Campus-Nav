@@ -61,6 +61,8 @@ The administrator interface provides:
 
 Path management operations validate inputs and update the corresponding data files.
 
+> **NOTE:** Administrator Access- The application includes a demonstration-level administrator login. Credentials are hard-coded in the source code for academic demonstration purposes. This is not intended for production security.
+
 ---
 
 ## 3️⃣Object-Oriented Design
